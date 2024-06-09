@@ -15,56 +15,39 @@ To run this program, you can use Remix, an online Solidity IDE. To get started, 
 Once you are on the Remix website, create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension (e.g., myToken.sol). Copy and paste the following code into the file:
 
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.0;
 
-contract VariableManager {
-    uint public uintVar;
-    string public stringVar;
-    bool public boolVar;
-    address public addressVar;
+contract ExampleContract {
+    address private owner;
+    uint public balance;
 
-    function setUintVar(uint _uintVar) public returns (uint) {
-        require(msg.sender == address(0x0000000000000000000000000000000000000001), "Only the owner can set the uint variable");
-        uintVar = _uintVar;
-        return uintVar;
+    constructor() public {
+        owner = msg.sender;
     }
 
-    function getUintVar() public view returns (uint) {
-        return uintVar;
+    function sendEther(address payable addr) public payable {
+        require(msg.value > 0, "Amount must be greater than 0");
+        require(msg.sender == owner, "Only the owner can send ether");
+
+        uint balanceBeforeTransfer = address(this).balance;
+        (bool success, ) = addr.call.value(msg.value)(""); 
+        require(success);
+
+        assert(address(this).balance == balanceBeforeTransfer - msg.value);
     }
 
-    function setStringVar(string memory _stringVar) public returns (string memory) {
-        require(bytes(_stringVar).length > 0, "String cannot be empty");
-        stringVar = _stringVar;
-        return stringVar;
+    function withdrawEther(uint amount) public {
+        assert(balances[msg.sender] >= amount);
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
     }
 
-    function getStringVar() public view returns (string memory) {
-        return stringVar;
+    function depositEther() public payable {
+        balances[msg.sender] += msg.value;
+        totalSupply += msg.value;
+        assert(address(this).balance >= totalSupply);
     }
-
-    function setBoolVar(bool _boolVar) public returns (bool) {
-        if (_boolVar == true) {
-            revert("Bool variable cannot be set to true");
-        }
-        boolVar = _boolVar;
-        return boolVar;
-    }
-
-    function getBoolVar() public view returns (bool) {
-        return boolVar;
-    }
-
-    function setAddressVar(address _addressVar) public returns (address) {
-        require(_addressVar != address(0), "Address cannot be zero");
-        addressVar = _addressVar;
-        return addressVar;
-    }
-
-    function getAddressVar() public view returns (address) {
-        return addressVar;
-    }
-}
+} 
 
 To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.18" (or another compatible version), and then click on the "Compile MyToken.sol" button.
 
