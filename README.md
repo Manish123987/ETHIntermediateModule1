@@ -16,6 +16,7 @@ Once you are on the Remix website, create a new file by clicking on the "+" icon
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.5.0;
+
 contract ExampleContract {
     address private owner;
     uint public balance;
