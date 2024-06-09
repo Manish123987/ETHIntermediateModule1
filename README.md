@@ -21,9 +21,25 @@ pragma solidity ^0.8.0;
 contract ExampleContract {
     address private owner;
     uint public balance;
+    mapping(address => uint) public balances;
+    uint public totalSupply;
 
-    constructor() public {
+    constructor() {
         owner = msg.sender;
+    }
+
+    function depositEther() public payable {
+        balances[msg.sender] += msg.value;
+        totalSupply += msg.value;
+        assert(address(this).balance >= totalSupply);
+    }
+
+    function withdrawEther(uint amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        if (!payable(msg.sender).send(amount)) {
+            revert("Failed to send funds");
+        }
     }
 
     function sendEther(address payable addr) public payable {
@@ -31,23 +47,12 @@ contract ExampleContract {
         require(msg.sender == owner, "Only the owner can send ether");
 
         uint balanceBeforeTransfer = address(this).balance;
-        (bool success, ) = addr.call.value(msg.value)(""); 
-        require(success);
+        (bool success, ) = addr.call{value: msg.value}("");
+        require(success, "Transfer failed");
 
         assert(address(this).balance == balanceBeforeTransfer - msg.value);
     }
-
-    function withdrawEther(uint amount) public {
-        assert(balances[msg.sender] >= amount);
-        balances[msg.sender] -= amount;
-        payable(msg.sender).transfer(amount);
-    }
-
-    function depositEther() public payable {
-        balances[msg.sender] += msg.value;
-        totalSupply += msg.value;
-        assert(address(this).balance >= totalSupply);
-    }  } 
+}
 
 To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.18" (or another compatible version), and then click on the "Compile MyToken.sol" button.
 
