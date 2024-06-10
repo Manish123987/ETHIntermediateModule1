@@ -1,4 +1,4 @@
-# ETH + AVAX PROOF: Intermediate EVM Course Module - 1
+# Ether Vault Project
 
 This module introduces the concepts of functions and error handling in Solidity, focusing on their application in Ethereum and Avalanche smart contract development.
 
