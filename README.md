@@ -1,10 +1,8 @@
 # Ether Vault Project
 
-Ether Vault is a secure Ethereum wallet contract that allows users to deposit and withdraw Ether safely. It features functionalities for users to deposit Ether, withdraw Ether, and for the contract owner to send Ether to any specified address. The contract ensures the balance integrity using assertions and provides safe fund management through require checks and safe transfer methods.
-
 ## Description 
 
-It is designed to provide developers with a comprehensive understanding of essential programming constructs in Solidity, focusing on functions and error handling mechanisms. This module equips learners with the skills needed to write more secure and efficient smart contracts on the Ethereum and Avalanche blockchains.
+Ether Vault is a secure Ethereum wallet contract that allows users to deposit and withdraw Ether safely. It features functionalities for users to deposit Ether, withdraw Ether, and for the contract owner to send Ether to any specified address. The contract ensures the balance integrity using assertions and provides safe fund management through require checks and safe transfer methods.
 
 ## ## Getting Started
 
