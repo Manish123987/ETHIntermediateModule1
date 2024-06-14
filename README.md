@@ -1,8 +1,8 @@
-# Ether Vault Project
+# SimpleBank
 
 ## Description 
 
-Ether Vault is a secure Ethereum wallet contract that allows users to deposit and withdraw Ether safely. It features functionalities for users to deposit Ether, withdraw Ether, and for the contract owner to send Ether to any specified address. The contract ensures the balance integrity using assertions and provides safe fund management through require checks and safe transfer methods.
+SimpleBank is a decentralized smart contract implementation of a basic banking system on the Ethereum blockchain. This contract allows users to deposit, withdraw, and transfer Ether securely while demonstrating proper error handling using Solidity's require(), assert(), and revert() statements.
 
 ## ## Getting Started
 
@@ -16,39 +16,54 @@ Once you are on the Remix website, create a new file by clicking on the "+" icon
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract EtherVault {
-    address private owner;
-    uint public balance;
-    mapping(address => uint) public balances;
-    uint public totalSupply;
+contract SimpleBank {
+    mapping(address => uint256) private balances;
+    address public owner;
 
     constructor() {
         owner = msg.sender;
     }
 
-    function depositEther() public payable {
+    function deposit() public payable {
+        require(msg.value > 0, "Deposit amount must be greater than zero");
         balances[msg.sender] += msg.value;
-        totalSupply += msg.value;
-        assert(address(this).balance >= totalSupply);
     }
 
-    function withdrawEther(uint amount) public {
+    function withdraw(uint256 amount) public {
         require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        uint256 initialBalance = balances[msg.sender];
         balances[msg.sender] -= amount;
-        if (!payable(msg.sender).send(amount)) {
-            revert("Failed to send funds");
-        }
+        payable(msg.sender).transfer(amount);
+
+        assert(balances[msg.sender] == initialBalance - amount);
     }
 
-    function sendEther(address payable addr) public payable {
-        require(msg.value > 0, "Amount must be greater than 0");
-        require(msg.sender == owner, "Only the owner can send ether");
+    function transfer(address recipient, uint256 amount) public {
+        require(recipient != address(0), "Recipient address cannot be zero");
+        require(balances[msg.sender] >= amount, "Insufficient balance");
 
-        uint balanceBeforeTransfer = address(this).balance;
-        (bool success, ) = addr.call{value: msg.value}("");
-        require(success, "Transfer failed");
+        uint256 senderInitialBalance = balances[msg.sender];
+        uint256 recipientInitialBalance = balances[recipient];
+        
+        balances[msg.sender] -= amount;
+        balances[recipient] += amount;
 
-        assert(address(this).balance == balanceBeforeTransfer - msg.value);
+        assert(balances[msg.sender] == senderInitialBalance - amount);
+        assert(balances[recipient] == recipientInitialBalance + amount);
+    }
+
+    function checkBalance() public view returns (uint256) {
+        return balances[msg.sender];
+    }
+
+    function emergencyWithdraw(uint256 amount) public {
+        if (msg.sender != owner) {
+            revert("Only the owner can perform emergency withdrawal");
+        }
+        require(address(this).balance >= amount, "Insufficient contract balance");
+
+        payable(owner).transfer(amount);
     }
 }
 
